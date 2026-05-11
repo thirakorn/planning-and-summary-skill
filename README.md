@@ -41,7 +41,9 @@ Real example of what a plan looks like:
 
 A skill cannot fire automatically at session start, so this block has to live somewhere the AI loads every session.
 
-**Next step on your side:** copy that block into:
+**Which block to copy:** the section in `SKILL.md` titled **`## Session Start Routing (copy to CLAUDE.md and Copilot instructions)`** (lines 11–36). Copy everything from that heading down to and including the `**For Copilot:** ...` paragraph — that whole block is what the AI needs to load every session.
+
+**Where to paste it:**
 - **`CLAUDE.md`** at the project root (Claude Code auto-loads it every session)
 - **`.github/copilot-instructions.md`** (Copilot picks it up as custom instructions)
 
