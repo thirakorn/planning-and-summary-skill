@@ -39,6 +39,8 @@ Real example of what a plan looks like:
 
 `SKILL.md` includes a **Session Start Routing** block that makes the AI ask the user — on the first message of a new session — whether they want **Planning**, **Implementation**, or **Code Review**, then route to the right mode.
 
+After **Implementation** mode finishes, the AI will also produce an `implementation-summary.md` describing what was built, which files changed, key decisions, and how to verify the change. The exact format lives in the "Implementation Summary Output" section of `SKILL.md`.
+
 A skill cannot fire automatically at session start, so this block has to live somewhere the AI loads every session.
 
 **Which block to copy:** the section in `SKILL.md` titled **`## Session Start Routing (copy to CLAUDE.md and Copilot instructions)`** (lines 11–36). Copy everything from that heading down to and including the `**For Copilot:** ...` paragraph — that whole block is what the AI needs to load every session.
@@ -284,18 +286,6 @@ Track these to know if it's working:
 - Better visibility into feature planning
 - Realistic timelines from plans
 - Risk awareness early
-
----
-
-## 📁 File Checklist
-
-You should have:
-- [ ] SKILL.md (the skill definition)
-- [ ] TEAM_GUIDE.md (how your team uses it)
-- [ ] example_output_updated.md (demo example)
-- [ ] This summary document
-
-All in: `/mnt/user-data/outputs/`
 
 ---
 

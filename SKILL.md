@@ -24,9 +24,32 @@ Reply with 1, 2, 3 or the mode name.
 ```
 
 **Mode behavior:**
-- **Planning** → invoke the `planning-and-summary` skill and produce the markdown plan defined in this file. Do not write code.
-- **Implementation** → proceed to implement the task directly. Follow existing project conventions.
-- **Code Review** → review the diff / PR / specified files. Report issues, suggestions, and risks. Do not make code changes unless asked.
+- **Planning** → invoke the `planning-and-summary` skill and produce the markdown plan defined in this file. Do not write code. **Adapt the output style to the task type:**
+  - **Bug fix / Issue fix** → emphasize the *Scope of Changes* with before/after code snippets for each affected file, plus a short *Change Conclusion* explaining what the fix changes in behavior. See [Planning Output — Fix Variant](#planning-output--fix-variant).
+  - **New feature / Addition** → emphasize the *Files Added/Changed* table and a *Feature Change Summary* describing the new capability and user-visible behavior. Code-level before/after is optional. See [Planning Output — Feature Variant](#planning-output--feature-variant).
+  - **Mixed / Unclear** → ask the user which variant fits before producing the plan.
+- **Implementation** → proceed to implement the task directly. Follow existing project conventions. **After the implementation succeeds**, pause and ask the user:
+
+  ```
+  Implementation complete. Generate an `implementation-summary.md` file?
+    1. Yes — create the summary using the format in this skill
+    2. No  — skip the summary
+
+  Reply 1 or 2.
+  ```
+
+  Only generate `implementation-summary.md` (using the format defined in [Implementation Summary Output](#implementation-summary-output) below) if the user chooses **Yes**. If the user chooses **No**, end the task without writing a summary file.
+- **Code Review** → review the diff / PR / specified files. Report issues, suggestions, and risks. Do not make code changes unless asked. **After the review is delivered**, pause and ask the user:
+
+  ```
+  Code review complete. Generate a commit message for these changes?
+    1. Yes — draft a commit message based on the reviewed diff
+    2. No  — skip the commit message
+
+  Reply 1 or 2.
+  ```
+
+  Only draft and output a commit message if the user chooses **Yes**. Do not run `git commit` — just produce the message text for the user to use.
 
 **Skip the prompt when:**
 - The user's first message already states the mode clearly (e.g. "implement X", "review this PR", "plan Y").
@@ -200,6 +223,167 @@ Which files/code change and how:
 - [ ] All existing tests pass
 - [ ] Code review approved
 ```
+
+The structure above is the **base template**. Depending on the task type, switch to one of the variants below.
+
+## Planning Output — Fix Variant
+
+Use this variant when the task is a **bug fix** or fixing an existing issue. The key difference: show **before/after code snippets** for each affected file, and end with a clear **Change Conclusion**.
+
+```markdown
+# [Bug / Issue Name] - Fix Plan
+
+## Problem
+- What is broken (symptom)
+- Root cause (if known)
+- Why it matters / who is affected
+
+## Scope of Changes (Before / After)
+
+### `path/to/file1.ext`
+**Before:**
+​```language
+// existing code that has the bug
+​```
+
+**After:**
+​```language
+// updated code with the fix
+​```
+**Reason:** one-line explanation of why this change fixes the issue.
+
+### `path/to/file2.ext`
+**Before:**
+​```language
+// ...
+​```
+
+**After:**
+​```language
+// ...
+​```
+**Reason:** ...
+
+## Change Conclusion
+- What behavior changes after the fix
+- What stays the same
+- Any side effects to watch for
+- How to verify the fix
+
+## Risks & Mitigation
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|-----------|
+| ...  | ...       | ...    | ...       |
+
+## Acceptance Criteria
+- [ ] Bug no longer reproduces with the original steps
+- [ ] Regression test added
+- [ ] Existing tests pass
+```
+
+## Planning Output — Feature Variant
+
+Use this variant when the task is **adding a new feature** or new capability. The key difference: focus on a **Files Added/Changed table** and a **Feature Change Summary**. Code-level before/after snippets are optional — only include them when a specific function needs to change in a non-obvious way.
+
+```markdown
+# [Feature Name] - Feature Plan
+
+## Goals & Objectives
+- What the feature delivers
+- Success metrics
+
+## Feature Change Summary
+- What the user can do *now* that they couldn't before
+- User-visible behavior (UI flows, API endpoints, etc.)
+- What stays unchanged
+
+## Technical Approach
+- Overall strategy
+- Key architecture decisions
+- Components / modules affected
+
+## Files Added / Changed
+
+| File | Type | Purpose | Impact |
+|------|------|---------|--------|
+| `path/to/new-feature.ext` | Added   | Holds the new feature logic       | ~120 lines new |
+| `path/to/existing.ext`    | Modified| Wire the feature into the flow    | ~30 lines added |
+| `path/to/config.ext`      | Modified| Add feature flag / config         | 1 line added |
+| `path/to/old.ext`         | Removed | Replaced by new module            | — |
+
+## Implementation Breakdown
+### Phase 1: [Phase Name]
+- [ ] Subtask 1
+- [ ] Subtask 2
+- Estimated effort: X hours
+
+### Phase 2: [Phase Name]
+- [ ] Subtask 1
+- Estimated effort: X hours
+
+## Assumptions
+- ...
+
+## Risks & Mitigation
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|-----------|
+| ...  | ...       | ...    | ...       |
+
+## Acceptance Criteria
+- [ ] Feature works end-to-end per the user flow above
+- [ ] Tests cover the new behavior
+- [ ] No regression in existing flows
+- [ ] Documentation / changelog updated (if applicable)
+```
+
+## Implementation Summary Output
+
+When **Implementation** mode finishes, produce a Markdown file named `implementation-summary.md` with this structure:
+
+```markdown
+# [Feature/Task Name] - Implementation Summary
+
+## What Was Implemented
+- Short description of what was built/changed and why
+
+## Files Changed
+| File | Change Type | Before | After |
+|------|-------------|--------|-------|
+| `path/to/file.js` | Modified | Email/password auth only | + OAuth2 support |
+| `path/to/new.js`  | Added    | —                        | New OAuth2 handler |
+| `path/to/old.js`  | Removed  | Legacy stub              | — |
+
+## Key Decisions
+- Decision 1 and the reason
+- Decision 2 and the reason
+- Any deviations from the original plan (if a plan existed)
+
+## How to Verify
+- Steps to manually test the change
+- Commands to run (build, lint, tests)
+- Expected results
+
+## Tests & Checks
+- [ ] Unit tests added/updated
+- [ ] Existing tests pass
+- [ ] Linter / type checks pass
+- [ ] Manual verification done
+
+## Known Issues / Follow-ups
+- Anything intentionally not handled
+- Tech debt or TODOs introduced
+- Suggested next steps
+
+## Acceptance Criteria Status
+- [x] Criterion 1 — met
+- [ ] Criterion 2 — not met (reason)
+```
+
+**Guidelines:**
+- Be specific in "Files Changed" — list every file actually touched, not just the main ones.
+- "Key Decisions" should capture non-obvious choices a reviewer would want to know.
+- If the task was done from a plan, call out any deviation explicitly.
+- Keep it concise — this is a handover, not a story.
 
 ## How to Use This Skill
 
