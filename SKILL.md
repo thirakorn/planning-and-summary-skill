@@ -24,7 +24,7 @@ Reply with 1, 2, 3 or the mode name.
 ```
 
 **Mode behavior:**
-- **Planning** → invoke the `planning-and-summary` skill and produce the markdown plan defined in this file. Do not write code. **Adapt the output style to the task type:**
+- **Planning** → invoke the `planning-and-summary` skill and produce the markdown plan defined in this file at **`docs/tasks/<task-slug>/planning-summary.md`** (see [Output Files & Folder Convention](#output-files--folder-convention)). Do not write code. **Adapt the output style to the task type:**
   - **Bug fix / Issue fix** → emphasize the *Scope of Changes* with before/after code snippets for each affected file, plus a short *Change Conclusion* explaining what the fix changes in behavior. See [Planning Output — Fix Variant](#planning-output--fix-variant).
   - **New feature / Addition** → emphasize the *Files Added/Changed* table and a *Feature Change Summary* describing the new capability and user-visible behavior. Code-level before/after is optional. See [Planning Output — Feature Variant](#planning-output--feature-variant).
   - **Mixed / Unclear** → ask the user which variant fits before producing the plan.
@@ -38,7 +38,7 @@ Reply with 1, 2, 3 or the mode name.
   Reply 1 or 2.
   ```
 
-  Only generate `implementation-summary.md` (using the format defined in [Implementation Summary Output](#implementation-summary-output) below) if the user chooses **Yes**. If the user chooses **No**, end the task without writing a summary file.
+  Only generate the summary if the user chooses **Yes**. Write it to **`docs/tasks/<task-slug>/implementation-summary.md`** using the format defined in [Implementation Summary Output](#implementation-summary-output) below. If the user chooses **No**, end the task without writing a summary file.
 - **Code Review** → review the diff / PR / specified files. Report issues, suggestions, and risks. Do not make code changes unless asked. **After the review is delivered**, pause and ask the user:
 
   ```
@@ -338,7 +338,7 @@ Use this variant when the task is **adding a new feature** or new capability. Th
 
 ## Implementation Summary Output
 
-When **Implementation** mode finishes, produce a Markdown file named `implementation-summary.md` with this structure:
+When **Implementation** mode finishes (and the user opts in), write the summary to `docs/tasks/<task-slug>/implementation-summary.md` with this structure:
 
 ```markdown
 # [Feature/Task Name] - Implementation Summary
@@ -415,11 +415,26 @@ The summary is a starting point. You can ask Claude to:
 4. **Iterate** - Plans aren't perfect on first draft; refine as needed
 5. **Keep it flexible** - Plans change; update the summary as you learn more
 
-## Output Files
+## Output Files & Folder Convention
 
-Claude will create:
-- **planning-summary.md** - The main planning document
-- You can copy this into your project wiki, issue tracker, or documentation
+All markdown artifacts produced by this skill live under **`docs/tasks/<task-slug>/`** at the repo root. Each task gets its own folder so plan, implementation summary, and any review notes stay grouped together.
+
+```
+docs/tasks/<task-slug>/
+  ├─ planning-summary.md         ← from Planning mode
+  ├─ implementation-summary.md   ← from Implementation mode (if user opts in)
+  └─ review-notes.md             ← optional, from Code Review mode
+```
+
+**Task slug rules:**
+- Lowercase, kebab-case (e.g. `oauth-google-login`, `fix-login-timeout`).
+- Short and descriptive — derive it from the task title.
+- If the user already gave a ticket ID (e.g. `JIRA-123`), prefix it: `jira-123-oauth-google-login`.
+
+**Behavior:**
+- If `docs/tasks/<task-slug>/` does not exist, create it.
+- If a file already exists, ask the user whether to overwrite or append a suffix (`-v2`, `-rev2`, etc.) before writing.
+- Use the same `<task-slug>` across Planning, Implementation, and Code Review for the same task so all artifacts land in one folder.
 
 ## Team Standard
 
