@@ -6,6 +6,20 @@
 
 ---
 
+## 🚀 How to Install
+
+Install this skill into your Claude Code setup with one command:
+
+```bash
+npx skills add thirakorn/planning-and-summary-skill
+```
+
+This fetches the latest `SKILL.md` from this repo and registers it locally. Once installed, the skill is available in any Claude Code session — invoke it via `/planning-and-summary` or by asking Claude to "plan this task using the planning-and-summary skill."
+
+To get the session start routing behavior (auto-prompt for Planning / Implementation / Code Review), also do the [Session Start Routing setup](#-setup-activate-session-start-routing) below.
+
+---
+
 ## 📦 What You're Getting
 
 ### 1. **SKILL.md** (Skill Definition)
